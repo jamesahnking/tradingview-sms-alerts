@@ -1,11 +1,15 @@
 
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import twilio from 'twilio';
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+interface WebhookRequest {
+    method?: string;
+    body?: TradingViewAlert;
+}
+
+interface WebhookResponse {
+    status: (code: number) => WebhookResponse;
+    json: (data: any) => void;
+}
 
 interface TradingViewAlert {
   symbol: string;
@@ -14,17 +18,35 @@ interface TradingViewAlert {
   timestamp: string;
 }
 
+// Initialize Twilio client with proper validation
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+if (!accountSid || !authToken) {
+  throw new Error('Missing required Twilio environment variables: TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN');
+}
+
+const client = twilio(
+  accountSid,
+  authToken
+);
+
+// Ensure environment variables are loaded
 export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
+  req: WebhookRequest,
+  res: WebhookResponse
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const alert: TradingViewAlert = req.body;
+    const alert = req.body as TradingViewAlert;
     
+    if (!alert) {
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+        // const alert: TradingViewAlert = req.body;   
     // Basic validation
     if (!alert.symbol || !alert.action || !alert.price) {
       return res.status(400).json({ error: 'Missing required fields' });
