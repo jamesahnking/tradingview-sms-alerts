@@ -1,67 +1,22 @@
 {
+  "functions": {
+    "api/webhook.ts": {
+      "maxDuration": 10
+    }
+  }
+}
+{
   "version": 2,
-  "name": "tradingview-sms-alerts",
-  "description": "TradingView webhook to SMS alert system",
   "builds": [
     {
-      "src": "api/**/*.ts",
+      "src": "api/webhook.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/webhook",
-      "dest": "/api/webhook.ts",
-      "methods": ["POST"]
+      "dest": "api/webhook.ts"
     }
-
-  ],
-  "functions": {
-    "api/webhook.ts": {
-      "maxDuration": 10
-    }
-  },
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "regions": ["iad1", "sfo1"],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/webhook",
-      "destination": "/api/webhook"
-    }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+  ]
 }
